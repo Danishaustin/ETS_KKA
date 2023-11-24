@@ -23,12 +23,11 @@ class UlarTangga:
         else:
             return current_position
     
-    def check_debuff(self, current_position, new_position):
+    def check_debuff(self, current_position, dice_result):
         for i in self.debuff_positions:
-            if(current_position < i and new_position >= i):
-                return 2
-            else:
-                return 1
+            if(current_position < i <= current_position + dice_result):
+                return 3
+        return 1
 
     def find_shortest_path(self):
         visited = set()
@@ -58,7 +57,7 @@ class UlarTangga:
             # Searching menggunakan BFS
             for dice_result in range(1, i):
                 new_position = self.move(current_position, dice_result)
-                step_increase = self.check_debuff(current_position, new_position)
+                step_increase = self.check_debuff(current_position, dice_result)
                 if new_position not in visited:
                     visited.add(new_position)
                     new_moves = moves + [(new_position, steps + step_increase, dice_result)]
@@ -88,7 +87,7 @@ def main():
         snakes_and_ladders[start] = end
 
     # Input snake
-    snake_count = int(input("Masukkan jumlah ular: "))
+    snake_count = int(input("\nMasukkan jumlah ular: "))
     for _ in range(snake_count):
         start = int(input("Masukkan posisi ular: "))
         end = int(input("Masukkan tujuan ular: "))
@@ -100,7 +99,7 @@ def main():
         snakes_and_ladders[start] = end
 
     # Input buff
-    print("Terdapat komponen buff, jika melangkah ke petak buff maka 3 langkah selanjutnya bisa berjalan 1-12 langkah")
+    print("\nTerdapat komponen buff, jika melangkah ke petak buff maka 3 langkah selanjutnya bisa berjalan 1-12 langkah")
     buff_count = int(input("Masukkan Jumlah Buff: "))
     buff_positions = []
     for _ in range(buff_count):
@@ -108,7 +107,7 @@ def main():
         buff_positions.append(position1)
 
     # Input debuff
-    print("Terdapat komponen debuff, jika terdapat langkah yang melewati petak debuff maka langkah tersebut dianggap 2 langkah")
+    print("\nTerdapat komponen debuff, jika terdapat langkah yang melewati petak debuff maka langkah tersebut dianggap 3 langkah")
     debuff_count = int(input("Masukkan Jumlah Debuff: "))
     debuff_positions = []
     for _ in range(debuff_count):
@@ -124,11 +123,20 @@ def main():
     shortest_path, moves = game.find_shortest_path()
 
     if shortest_path != -1:
+        position = 1
         print(f"Langkah paling sedikit: {shortest_path}")
         print("Langkah-langkah:")
         for move in moves:
+            position += move[2]
             print(f"Langkah {move[1]}")
-            print(f"Maju {move[2]} bergerak ke posisi {move[0]}")
+            if(position < move[0]):
+                print(f"Maju {move[2]} bergerak ke posisi {position} naik dengan tangga ke {move[0]}")
+                position = move[0]
+            elif(position > move[0]):
+                print(f"Maju {move[2]} bergerak ke posisi {position} turun dengan ular ke {move[0]}")
+                position = move[0]
+            else:
+                print(f"Maju {move[2]} bergerak ke posisi {move[0]}")
     else:
         print("Tidak ada jalur yang ditemukan.")
 
